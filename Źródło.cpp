@@ -15,26 +15,16 @@ using namespace std;
 
 /*************************************************************************************/
 
-//Funkcja losuj¹ca kolory
-void randomColor() {
-	glColor3f((rand() % 101) / 100.0, (rand() % 101) / 100.0, (rand() % 101) / 100.0);
-}
-
-// Funkcja tworz¹ca perturbacje we wspó³rzêdnych kwadratu
-float randomPosition(float a, float vertex) {
-	float offset = (a * 20) / 100.0f;
-	int intOffsetTimes1000 = (int)(offset * 1000);
-	if (intOffsetTimes1000 == 0) return vertex;
-	return vertex + (rand() % (2 * intOffsetTimes1000) - intOffsetTimes1000) / 1000.0f;
-}
-
 void choseVertex(int a, float x, float y, float deformation) {
 	if (deformation == 1) {
-		float offset = (a * 20) / 100.0f;
-		int intOffsetTimes1000 = (int)(offset * 1000);
-		if (intOffsetTimes1000 != 0) {
-			x = x + (rand() % (2 * intOffsetTimes1000) - intOffsetTimes1000) / 1000.0f;
-			y = y + (rand() % (2 * intOffsetTimes1000) - intOffsetTimes1000) / 1000.0f;
+		float rangeOfError = 0.20f;
+		//Skala perturbacji wyra¿ona w przedziale od 0 do 1
+
+		float error = a * rangeOfError;
+		int intErrorTimes1000 = (int)(error * 1000);
+		if (intErrorTimes1000 != 0) {
+			x = x + (rand() % (2 * intErrorTimes1000) - intErrorTimes1000) / 1000.0f;
+			y = y + (rand() % (2 * intErrorTimes1000) - intErrorTimes1000) / 1000.0f;
 		}
 	}
 	glVertex2f(x, y);
@@ -89,104 +79,6 @@ void newCreateCarpet(int a, int n, int deformation, int color) {
 	newCreateRect(x1, y1, x2, y2, a / 3, n, deformation, color);
 }
 
-// Funkcja tworz¹ca kwadrat, zele¿nie od parametru def tworzy tak¿e zak³ócenia
-void createRect(float x1, float y1, float x2, float y2, float a, int def, int color) {
-	if (def == 1) {
-		glBegin(GL_POLYGON);
-		if (color == 1) {
-			randomColor();
-		}
-		else {
-			glColor3f(1.0f, 1.0f, 1.0f);
-		}
-		glVertex2f(randomPosition(a, x1), randomPosition(a, y1));
-		if (color == 1) {
-			randomColor();
-		}
-		else {
-			glColor3f(1.0f, 1.0f, 1.0f);
-		}
-		glVertex2f(randomPosition(a, x2), randomPosition(a, y1));
-		if (color == 1) {
-			randomColor();
-		}
-		else {
-			glColor3f(1.0f, 1.0f, 1.0f);
-		}
-		glVertex2f(randomPosition(a, x2), randomPosition(a, y2));
-		if (color == 1) {
-			randomColor();
-		}
-		else {
-			glColor3f(1.0f, 1.0f, 1.0f);
-		}
-		glVertex2f(randomPosition(a, x1), randomPosition(a, y2));
-		glEnd();
-	}
-	else {
-		glBegin(GL_POLYGON);
-		if (color == 1) {
-			randomColor();
-		}
-		else {
-			glColor3f(1.0f, 1.0f, 1.0f);
-		}
-		glVertex2f(x1, y1);
-		if (color == 1) {
-			randomColor();
-		}
-		else {
-			glColor3f(1.0f, 1.0f, 1.0f);
-		}
-		glVertex2f(x2, y1);
-		if (color == 1) {
-			randomColor();
-		}
-		else {
-			glColor3f(1.0f, 1.0f, 1.0f);
-		}
-		glVertex2f(x2, y2);
-		if (color == 1) {
-			randomColor();
-		}
-		else {
-			glColor3f(1.0f, 1.0f, 1.0f);
-		}
-		glVertex2f(x1, y2);
-		glEnd();
-	}
-}
-
-// Funkcja rekurencyjna tworz¹ca kwadraty
-void createCarpet(float x1, float y1, float x2, float y2, int n, int def, int color) {
-
-	if (n < 0) return;
-	n--;
-
-	float a = (x2 - x1) / 3;
-	// Obliczenie d³ugoœci boku dla mniejszych kwadratów
-
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
-			if (i == 1 && j == 1) continue;
-			// Ominiêcie pêtli dla œrodkowego kwadratu
-
-			float newX1 = x1 + (i * a);
-			float newY1 = y1 - (j * a);
-			float newX2 = newX1 + a;
-			float newY2 = newY1 - a;
-			// Obliczenie wspó³rzêdnych dla nowego kwadratu
-
-			createCarpet(newX1, newY1, newX2, newY2, n, def, color);
-
-			if (n == 0) {
-				createRect(newX1, newY1, newX2, newY2, a, def, color);
-			}
-
-		}
-	}
-}
-
 void RenderScene(void) {
 
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -216,7 +108,6 @@ void RenderScene(void) {
 
 	srand(time(NULL));
 	newCreateCarpet(a, n, def, color);
-	//createCarpet(-80.0f, 80.0f, 80.0f, -80.0f, n, def, color);
 
 	glFlush();
 	// Przekazanie poleceñ rysuj¹cych do wykonania

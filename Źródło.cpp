@@ -28,7 +28,7 @@ float randomPosition(float a, float vertex) {
 	return vertex + (rand() % (2 * intOffsetTimes1000) - intOffsetTimes1000) / 1000.0f;
 }
 
-void choseVertex(float a, float x, float y, float deformation) {
+void choseVertex(int a, float x, float y, float deformation) {
 	if (deformation == 1) {
 		float offset = (a * 20) / 100.0f;
 		int intOffsetTimes1000 = (int)(offset * 1000);
@@ -49,8 +49,8 @@ void choseColor(int color) {
 	}
 }
 
-void newCreateRect(float x1, float y1, float x2, float y2, float a, int n, int deformation, int color) {
-	if (n < 0) return;
+void newCreateRect(float x1, float y1, float x2, float y2, int a, int n, int deformation, int color) {
+	if (n == 0) return;
 	n--;
 
 	for (int i = 0; i < 3; i++) {
@@ -62,7 +62,7 @@ void newCreateRect(float x1, float y1, float x2, float y2, float a, int n, int d
 			float newX2 = newX1 + a;
 			float newY2 = newY1 - a;
 
-			newCreateRect(newX1, newY1, newX2, newY2, a, n, deformation, color);
+			newCreateRect(newX1, newY1, newX2, newY2, a / 3, n, deformation, color);
 
 			if (n == 0) {
 				glBegin(GL_POLYGON);
@@ -74,18 +74,19 @@ void newCreateRect(float x1, float y1, float x2, float y2, float a, int n, int d
 				choseVertex(a, newX2, newY2, deformation);
 				choseColor(color);
 				choseVertex(a, newX1, newY2, deformation);
+				glEnd();
 			}
 		}
 	}
 }
 
-void newCreateCarpet(float a, int n, int deformation, int color) {
+void newCreateCarpet(int a, int n, int deformation, int color) {
 	float x1 = a / (-2.0f);
 	float y1 = a / (2.0f);
 	float x2 = a / (2.0f);
 	float y2 = a / (-2.0f);
 
-	newCreateRect(x1, y1, x2, y2, a / 3.0f, n, deformation, color);
+	newCreateRect(x1, y1, x2, y2, a / 3, n, deformation, color);
 }
 
 // Funkcja tworz¹ca kwadrat, zele¿nie od parametru def tworzy tak¿e zak³ócenia
@@ -194,27 +195,28 @@ void RenderScene(void) {
 
 	int n;
 	do {
-		cout << "Ile krokow ma wykonac algorytm" << endl;
+		cout << "Ile krokow ma wykonac algorytm?" << endl;
 		cin >> n;
 	} while (n < 0);
 	// Odcztanie liczby kroków wpisanej przez u¿ytkownika
 
 	int def;
 	do {
-		cout << "Czy dywan ma byc zdeformowany? (0 - nie; 1 - tak)" << endl;
+		cout << "Czy dywan ma byc zdeformowany? (0 - nie; 1 - tak)?" << endl;
 		cin >> def;
 	} while (def < 0 || def > 1);
 
 	int color;
 	do {
-		cout << "Czy dywan ma byc kolorowy? (0 - nie; 1 - tak)" << endl;
+		cout << "Czy dywan ma byc kolorowy? (0 - nie; 1 - tak)?" << endl;
 		cin >> color;
 	} while (color < 0 || color > 1);
 
-	float a = 160.0f;
+	int a = 729;
 
 	srand(time(NULL));
-	createCarpet(-80.0f, 80.0f, 80.0f, -80.0f, n, def, color);
+	newCreateCarpet(a, n, def, color);
+	//createCarpet(-80.0f, 80.0f, 80.0f, -80.0f, n, def, color);
 
 	glFlush();
 	// Przekazanie poleceñ rysuj¹cych do wykonania
@@ -274,11 +276,11 @@ void ChangeSize(GLsizei horizontal, GLsizei vertical) {
 
 	if (horizontal <= vertical)
 
-		glOrtho(-100.0, 100.0, -100.0 / AspectRatio, 100.0 / AspectRatio, 1.0, -1.0);
+		glOrtho(-500.0, 500.0, -500.0 / AspectRatio, 500.0 / AspectRatio, 1.0, -1.0);
 
 	else
 
-		glOrtho(-100.0 * AspectRatio, 100.0 * AspectRatio, -100.0, 100.0, 1.0, -1.0);
+		glOrtho(-500.0 * AspectRatio, 500.0 * AspectRatio, -500.0, 500.0, 1.0, -1.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	// Okreœlenie uk³adu wspó³rzêdnych     
@@ -302,7 +304,7 @@ void main(void) {
 	glutCreateWindow("Dywan Sierpiñskiego z perturbacjami");
 	// Utworzenie okna i okreœlenie treœci napisu w nag³ówku okna
 
-	glutReshapeWindow(800, 800);
+	glutReshapeWindow(1000, 1000);
 
 	glutDisplayFunc(RenderScene);
 	// Okreœlenie, ¿e funkcja RenderScene bêdzie funkcj¹ zwrotn¹ (callback)

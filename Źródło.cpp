@@ -15,10 +15,19 @@ using namespace std;
 
 /*************************************************************************************/
 
-void choseVertex(int a, float x, float y, float deformation) {
+void setColor(int color) {
+	if (color == 1) {
+		glColor3f((rand() % 101) / 100.0, (rand() % 101) / 100.0, (rand() % 101) / 100.0);
+	}
+	else {
+		glColor3f(1.0f, 1.0f, 1.0f);
+	}
+}
+
+void setCoordinate(int a, float x, float y, float deformation) {
 	if (deformation == 1) {
 		float rangeOfError = 0.20f;
-		//Skala perturbacji wyra¿ona w przedziale od 0 do 1
+		//Skala perturbacji wyra¿ona przedzia³em od 0 do 1
 
 		float error = a * rangeOfError;
 		int intErrorTimes1000 = (int)(error * 1000);
@@ -30,16 +39,22 @@ void choseVertex(int a, float x, float y, float deformation) {
 	glVertex2f(x, y);
 }
 
-void choseColor(int color) {
-	if (color == 1) {
-		glColor3f((rand() % 101) / 100.0, (rand() % 101) / 100.0, (rand() % 101) / 100.0);
-	}
-	else {
-		glColor3f(1.0f, 1.0f, 1.0f);
-	}
+
+
+void createRect(float x1, float y1, float x2, float y2, int a, int deformation, int color) {
+	glBegin(GL_POLYGON);
+	setColor(color);
+	setCoordinate(a, x1, y1, deformation);
+	setColor(color);
+	setCoordinate(a, x2, y1, deformation);
+	setColor(color);
+	setCoordinate(a, x2, y2, deformation);
+	setColor(color);
+	setCoordinate(a, x1, y2, deformation);
+	glEnd();
 }
 
-void newCreateRect(float x1, float y1, float x2, float y2, int a, int n, int deformation, int color) {
+void divideRect(float x1, float y1, int a, int n, int deformation, int color) {
 	if (n == 0) return;
 	n--;
 
@@ -49,34 +64,21 @@ void newCreateRect(float x1, float y1, float x2, float y2, int a, int n, int def
 
 			float newX1 = x1 + (i * a);
 			float newY1 = y1 - (j * a);
-			float newX2 = newX1 + a;
-			float newY2 = newY1 - a;
 
-			newCreateRect(newX1, newY1, newX2, newY2, a / 3, n, deformation, color);
+			divideRect(newX1, newY1, a / 3, n, deformation, color);
 
 			if (n == 0) {
-				glBegin(GL_POLYGON);
-				choseColor(color);
-				choseVertex(a, newX1, newY1, deformation);
-				choseColor(color);
-				choseVertex(a, newX2, newY1, deformation);
-				choseColor(color);
-				choseVertex(a, newX2, newY2, deformation);
-				choseColor(color);
-				choseVertex(a, newX1, newY2, deformation);
-				glEnd();
+				createRect(newX1, newY1, newX1 + a, newY1 - a, a, deformation, color);
 			}
 		}
 	}
 }
 
-void newCreateCarpet(int a, int n, int deformation, int color) {
+void initializeCarpet(int a, int n, int deformation, int color) {
 	float x1 = a / (-2.0f);
 	float y1 = a / (2.0f);
-	float x2 = a / (2.0f);
-	float y2 = a / (-2.0f);
 
-	newCreateRect(x1, y1, x2, y2, a / 3, n, deformation, color);
+	divideRect(x1, y1, a / 3, n, deformation, color);
 }
 
 void RenderScene(void) {
@@ -84,30 +86,27 @@ void RenderScene(void) {
 	glClear(GL_COLOR_BUFFER_BIT);
 	// Czyszczenie okna aktualnym kolorem czyszcz¹cym
 
+	int n, def, color;
+	int a = 729;
 
-	int n;
 	do {
 		cout << "Ile krokow ma wykonac algorytm?" << endl;
 		cin >> n;
 	} while (n < 0);
 	// Odcztanie liczby kroków wpisanej przez u¿ytkownika
 
-	int def;
 	do {
 		cout << "Czy dywan ma byc zdeformowany? (0 - nie; 1 - tak)?" << endl;
 		cin >> def;
 	} while (def < 0 || def > 1);
 
-	int color;
 	do {
 		cout << "Czy dywan ma byc kolorowy? (0 - nie; 1 - tak)?" << endl;
 		cin >> color;
 	} while (color < 0 || color > 1);
 
-	int a = 729;
-
 	srand(time(NULL));
-	newCreateCarpet(a, n, def, color);
+	initializeCarpet(a, n, def, color);
 
 	glFlush();
 	// Przekazanie poleceñ rysuj¹cych do wykonania
